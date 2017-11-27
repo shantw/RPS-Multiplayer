@@ -24,6 +24,12 @@ var config = {
  var selected1 = false;
  var selected2 = false;
  var playerTurn =1;
+ var winner = 0;
+ var win1 = 0;
+ var win2 = 0;
+ var losses1 = 0;
+ var losses2 = 0;
+ var winFlag = false;
 
 
  //var playersCount = 0;
@@ -87,18 +93,22 @@ for (i=1;i <3; i++) {
 
 database.ref("/players/").on("value", function(snapshot) {
 
-if (snapshot.child(2).exists()) {
+if (snapshot.child(2).exists() && !(winFlag)) {
   if ((snapshot.child("2").val().selectedValue !== '') && (snapshot.child("2").val().selectedValue !== '')) {
       var result = checkWinner(snapshot.child("1").val().selectedValue,snapshot.child("2").val().selectedValue)  
       if (result===1) {
           $("#result").text("The winner is : " + snapshot.child("1").val().playerName);
+          winner = 1;
       }
       else if (result ===2){  
         $("#result").text("The winner is : " + snapshot.child("2").val().playerName);
+        winner = 2;
       }
       else{
+        winner = 0;
         $("#result").text("It's a tie");
       }
+      $("#result").addClass("largeFont");
     }
 
   }
@@ -127,7 +137,7 @@ addNewUser();
 
 $(document).on("click", ".selection1", function(e){
 //$("#Rock1").on("click",function(e) {
-
+  winFlag = false;
   e.preventDefault();
   selected1 = true;
  selectedValue1 = $(this).attr("data-value");
@@ -136,7 +146,7 @@ $(document).on("click", ".selection1", function(e){
  var newDiv = $("<div>"+  selectedValue1 +"</div>");
  $(newDiv).addClass("largeFont");
  $("#p1Selection").append(newDiv);
- selectionList(2);
+ //selectionList(2);
  $("#player2").addClass("borderColor");
 
   //database.ref("player1").set("two");
@@ -154,20 +164,20 @@ $(document).on("click", ".selection2", function(e){
    var newDiv = $("<div>"+  selectedValue2 +"</div>");
    $(newDiv).addClass("largeFont");
    $("#p2Selection").append(newDiv);
-   selectionList(1);
+   //selectionList(1);
    $("#player1").addClass("borderColor");
-
-   //var result = checkWinner(fplayerName1,fplayerName2);
-  //console.log(result);
-   //if (result===1){
-     //database.ref("/players/1/wins").set(selectedValue2++);
-  //   console.log(database.ref("/players/1/wins").val());
-  // } else if (result===2){
-    //database.ref("/players/2/wins").set(selectedValue2++);
-  //  console.log(database.ref("/players/2/wins").val());
-  // }
-
-  
+  winFlag = true;
+  if (winner===1){
+    win1++;
+    losses2++;
+    database.ref("/players/1/wins").set(win1);
+    database.ref("/players/2/losses").set(losses2);
+  }  else if (winner===2){
+    win2++;
+    losses1++
+    database.ref("/players/2/wins").set(win2);
+    database.ref("/players/1/losses").set(losses1);
+  } 
   });
 
 function selectionList(key){
@@ -181,7 +191,6 @@ function selectionList(key){
       
       $("#p"+ key + "Selection").append(newDiv);
     }
-
 }
 
 function addNewUser(){
