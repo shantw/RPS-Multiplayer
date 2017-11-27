@@ -1,0 +1,29 @@
+
+.borders{
+    border: inset;
+    /*height: 100%;*/
+    height: 160px;
+}
+
+.borderColor{
+    border-color: blue;
+}
+
+.selection1{
+    text-align: center;
+}
+
+.selection2 {
+    text-align: center;
+}
+
+.paddingTop{
+    padding-top: 40px;
+}
+
+.largeFont{
+    font-size: 22px;
+    color: blue;
+    background: black;
+    text-align: center;
+}

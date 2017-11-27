@@ -10,7 +10,7 @@
      <link rel="stylesheet" href="./assets/css/style.css">
 
      <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js"></script>
-     
+
      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
@@ -27,7 +27,9 @@
 
    <div class="row">
     <div class="col-xs-12 col-md-12">
-       	<h1 class="headerfonts">Rock Paper Scissors</h1>   
+        <div class="jumbotron"> 
+               <h1 class="text-center">Rock Paper Scissors</h1>
+        </div>   
     </div> 
   </div>  
   <br>
@@ -36,10 +38,11 @@
     <div class="col-xs-12 col-md-12">
         <form>
             <div class="form-group row">
-                <label for="userName" class="col-sm-3 col-form-label">Player Name:</label>
-                <div class="col-sm-9">
-                    <input name="userName" id='userName' type="text" class="form-control">
+                <label for="playerName" class="col-sm-2 col-form-label">Player Name:</label>
+                <div class="col-sm-3">
+                    <input name="playerName" id='playerName' type="text" placeholder="Enter your name" class="form-control input-sm">
                 </div>  
+                <button id="startBtn" type="button" class="btn btn-primary col-sm-2 btn-sm">Start</button>
             </div>
         </form>    	  
     </div> 
@@ -47,21 +50,43 @@
 
   <div class="row">
         <div class="col-xs-4 col-md-4">
-            <div id="player1">
-                Player 1
+            <div id="player1" class="borders">
+                <div id="playerName1"class="col-xs-12 col-md-12">Player 1 : </div>
+                <br><br>
+
+                <div id="p1Selection" class="col-xs-12 col-md-12">
+                </div>
+                <br>
+                <div id="p1Score" class="col-xs-12 col-md-12 paddingTop">
+                        <div id="p1Wins" class="col-xs-6 col-md-6">Wins: </div>
+                        <div id="p1Losses" class="col-xs-6 col-md-6">Losses: </div>
+                </div>
+
             </div>
         </div>
 
         <div class="col-xs-4 col-md-4">
-                <div id="result">
+                <div id="result" class="borders">
                     Result
                 </div>
         </div> 
 
         <div class="col-xs-4 col-md-4">
-                <div id="player2">
-                    Player 2
+            <div id="player2" class="borders">
+                <div id="playerName2"class="col-xs-12 col-md-12">Player 2 : </div>
+                <br><br>
+
+                <div id="p2Selection" class="col-xs-12 col-md-12">
+                <!--    <div>Rock</div>
+                    <div>Paper</div>
+                    <div>Scissors</div> -->
                 </div>
+                <br>
+                <div id="p2Score" class="col-xs-12 col-md-12 paddingTop">
+                        <div id="p2Wins" class="col-xs-6 col-md-6">Wins: </div>
+                        <div id="p2Losses" class="col-xs-6 col-md-6">Losses: </div>
+                </div>
+            </div>
         </div> 
 
       </div> 
@@ -69,7 +94,7 @@
 
       <div class="row">
             <div class="col-xs-12 col-md-12">
-                <div id="chat">
+                <div id="chat" class="borders">
                     chat area
                 </div>
             </div>
