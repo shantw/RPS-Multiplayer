@@ -12,7 +12,6 @@ var config = {
 
 // Create a variable to reference the database
  var database = firebase.database();
- var numberOfUsers ;
  var arrRPS = ['Rock','Paper','Scissors'];
  var playerName = "";
  var wins = 0;
@@ -20,9 +19,7 @@ var config = {
  var selectedValue1 = "";
  var selectedValue2 = "";
  var selectedValue = "";
- var player = "none";
- var selected1 = false;
- var selected2 = false;
+ var player = null;
  var playerTurn =1;
  var winner = 0;
  var win1 = 0;
@@ -30,49 +27,30 @@ var config = {
  var losses1 = 0;
  var losses2 = 0;
  var winFlag = false;
+ var existingPlayers = null;
 
 
- //var playersCount = 0;
+  
+//database.ref().on("value", function(snapshot) {
 
- var connectionsRef = database.ref("/connections");
- 
- // '.info/connected' is a special location provided by Firebase that is updated every time
- // the client's connection state changes.
- // '.info/connected' is a boolean value, true if the client is connected and false if they are not.
- var connectedRef = database.ref(".info/connected");
- 
- // When the client's connection state changes...
- connectedRef.on("value", function(snap) {
- 
-   // If they are connected..
-   if (snap.val()) {
- 
-     // Add user to the connections list.
-     var con = connectionsRef.push(true);
-      
-     // Remove user from the connection list when they disconnect.
-     con.onDisconnect().remove();
-   }
- });
- 
- // When first loaded or when the connections list changes...
- connectionsRef.on("value", function(snap) {
- 
-   // The number of online users is the number of children in the connections list.
-   numberOfUsers= snap.numChildren();
-   console.log("nbrusers " + numberOfUsers);
- });
+ // player = snapshot.val().player;
 
-// Initial Variables (SET the first set IN FIREBASE FIRST)
+//});
 
-
-database.ref().on("value", function(snapshot) {
-
-  player = snapshot.val().player;
-
-});
+// startbtn adds player in firebase
+$("#startBtn").on("click", function() {
+  // Prevent the page from refreshing
+  event.preventDefault();
+  //calling a function to add a new player
+  addNewUser();
+  
+  });
 
 database.ref("/players/").on("value", function(snapshot) {
+
+existingPlayers = snapshot.numChildren();
+player1Exists = snapshot.child("1").exists();
+player2Exists = snapshot.child("2").exists();
 
 for (i=1;i <3; i++) {
     if (snapshot.child(i).exists()) {
@@ -85,7 +63,12 @@ for (i=1;i <3; i++) {
         $("#playerName"+i).text("Player "+ i + ": " + childName);
         $("#p" + i + "Wins").text("Wins: " + childWin);
         $("#p" + i + "Losses").text("Losses: " + childLosses);
-      
+    }
+    else
+    {
+      $("#playerName"+i).text("Waiting for Player 1");
+      $("#p" + i + "Wins").empty();
+      $("#p" + i + "Losses").empty();
    }
 }
 
@@ -116,55 +99,51 @@ if (snapshot.child(2).exists() && !(winFlag)) {
 });
 
 
-// startbtn adds player in firebase
-$("#startBtn").on("click", function() {
-// Prevent the page from refreshing
-event.preventDefault();
-//calling a function to add a new player
-sessionStorage.clear();
-if (player==="one"){
-  sessionStorage.setItem('key' , 'window1');
-  }
-  else if (player==="two")
-  {
-    sessionStorage.setItem('key' , 'window2');
-  }
-//window.sessionStorage.key()
 
-addNewUser();
+$("#display1Btn").on("click", function(e) {
+  
+  e.preventDefault();
+    $("#p1Selection").empty();
+    var newDiv = $("<div>"+  selectedValue1 +"</div>");
+    $(newDiv).addClass("largeFont");
+    $("#p1Selection").append(newDiv);
+    $("#player2").addClass("borderColor");  
+  
+  });
 
-});
 
 $(document).on("click", ".selection1", function(e){
 //$("#Rock1").on("click",function(e) {
   winFlag = false;
   e.preventDefault();
-  selected1 = true;
+  database.ref("turn").set("2");
  selectedValue1 = $(this).attr("data-value");
  database.ref("/players/1/selectedValue").set(selectedValue1);
- $("#p1Selection").empty();
- var newDiv = $("<div>"+  selectedValue1 +"</div>");
- $(newDiv).addClass("largeFont");
- $("#p1Selection").append(newDiv);
- //selectionList(2);
- $("#player2").addClass("borderColor");
+ $("#display1Btn").click();
 
-  //database.ref("player1").set("two");
+// $("#p1Selection").empty();
+ //var newDiv = $("<div>"+  selectedValue1 +"</div>");
+ //$(newDiv).addClass("largeFont");
+ //$("#p1Selection").append(newDiv);
+ //selectionList(2);
+// $("#player2").addClass("borderColor");
+
 
 });
 
 $(document).on("click", ".selection2", function(e){
   //$("#Rock1").on("click",function(e) {
   
-    e.preventDefault();
-    selected2 = true;
+   e.preventDefault();
+   database.ref("turn").set("1");
    selectedValue2 = $(this).attr("data-value"); 
    database.ref("/players/2/selectedValue").set(selectedValue2);
    $("#p2Selection").empty();
    var newDiv = $("<div>"+  selectedValue2 +"</div>");
    $(newDiv).addClass("largeFont");
    $("#p2Selection").append(newDiv);
-   //selectionList(1);
+     
+   
    $("#player1").addClass("borderColor");
   winFlag = true;
   if (winner===1){
@@ -195,43 +174,47 @@ function selectionList(key){
 
 function addNewUser(){
 
-  if (numberOfUsers < 3) {
+  if (existingPlayers < 2) {
     playerName = $("#playerName").val().trim();
     //chek if it is the first player and add a record in the firebase
-    if (player==="one"){   
-        database.ref("player").set("two");
-    
-            database.ref("/players").child("1").set({
-            playerName: playerName,
-            wins : wins,
-            losses : losses,
-            selectedValue : selectedValue,
+    if (player1Exists){
+        player = 2;     
+        database.ref("/players").child("2").set({
+        playerName: playerName,
+        wins : 0,
+        losses : 0,
+        selectedValue : null,
         });
-        //if (numberOfUsers > 1){
-          selectionList(1);
+        database.ref("/players/2").onDisconnect().remove();
+        database.ref("turn").onDisconnect().remove();
+        $("#playerNameDiv").empty();
+        $("#playerNameDiv").html("<h2>Hi " + playerName + "! You are Player 2" + "</h2>");
+        //  selectionList(1);
        //     $("#player1").addClass("borderColor");
-       // }
-        
-
-    } else if (player==="two"){
-    // check if it is the second player and add a record in firebase    
-       database.ref("player").set("full");
-       database.ref("/players").child("2").set({
-            playerName: playerName,
-            wins : wins,
-            losses : losses,
-            selectedValue : selectedValue,
+    } 
+    else 
+    {
+    // check if it is the second player and add a record in firebase   
+       player = 1; 
+       //database.ref("turn").set("1");
+       database.ref("/players").child("1").set({
+        playerName: playerName,
+        wins : wins,
+        losses : losses,
+        selectedValue : null,
         });
-        if (numberOfUsers > 1){
-          selectionList(2);
+        database.ref("/players/1").onDisconnect().remove();
+        database.ref("turn").onDisconnect().remove();
+        $("#playerNameDiv").empty();
+        $("#playerNameDiv").html("<h2>Hi " + playerName + "! You are Player 1" + "</h2>");
+        //  selectionList(2);
        //   $("#player1").addClass("borderColor");
-     }
     } 
 }
-else{   
-  alert("there are already 2 players in the game");
+else
+{   
+  alert("There are already 2 players in the game");
 }
-
 }
 
 function checkWinner(choice1,choice2){
