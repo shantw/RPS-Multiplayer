@@ -13,29 +13,26 @@ var config = {
 // Create a variable to reference the database
  var database = firebase.database();
  var arrRPS = ['Rock','Paper','Scissors'];
- var playerName = "";
- var wins = 0;
- var losses = 0;
- var selectedValue1 = "";
- var selectedValue2 = "";
- var selectedValue = "";
+ var existingPlayers = null;
  var player = null;
- var playerTurn =1;
+ var playerTurn =null;
+ var player1Info = null;
+ var player2Info = null;
  var winner = 0;
  var win1 = 0;
  var win2 = 0;
  var losses1 = 0;
  var losses2 = 0;
- var winFlag = false;
- var existingPlayers = null;
+ var selectedValue1 = "";
+ var selectedValue2 = "";
+
+ var playerName = "";
+ var wins = 0;
+ var losses = 0;
+ 
+ var selectedValue = "";
 
 
-  
-//database.ref().on("value", function(snapshot) {
-
- // player = snapshot.val().player;
-
-//});
 
 // startbtn adds player in firebase
 $("#startBtn").on("click", function() {
@@ -63,6 +60,12 @@ for (i=1;i <3; i++) {
         $("#playerName"+i).text("Player "+ i + ": " + childName);
         $("#p" + i + "Wins").text("Wins: " + childWin);
         $("#p" + i + "Losses").text("Losses: " + childLosses);
+        if (i===1){
+          player1Info = snapshot.child("1").val();
+         }
+         else{
+          player2Info = snapshot.child("2").val();
+         }
     }
     else
     {
@@ -70,94 +73,130 @@ for (i=1;i <3; i++) {
       $("#p" + i + "Wins").empty();
       $("#p" + i + "Losses").empty();
    }
+
 }
 
 });
 
-database.ref("/players/").on("value", function(snapshot) {
-
-if (snapshot.child(2).exists() && !(winFlag)) {
-  if ((snapshot.child("2").val().selectedValue !== '') && (snapshot.child("2").val().selectedValue !== '')) {
-      var result = checkWinner(snapshot.child("1").val().selectedValue,snapshot.child("2").val().selectedValue)  
-      if (result===1) {
-          $("#result").text("The winner is : " + snapshot.child("1").val().playerName);
-          winner = 1;
-      }
-      else if (result ===2){  
-        $("#result").text("The winner is : " + snapshot.child("2").val().playerName);
-        winner = 2;
-      }
-      else{
-        winner = 0;
-        $("#result").text("It's a tie");
-      }
-      $("#result").addClass("largeFont");
-    }
-
+database.ref("/players/").on("child_added", function(snapshot) {
+  if (existingPlayers === 1) {
+    database.ref("turn").set(1);
   }
-
 });
 
+database.ref("turn").on("value", function(snap) {
 
+  playerTurn = snap.val();
+  //console.log(playerTurn);
+  if (player === 1 || player ===2) {
+    // For turn 1
+    if (playerTurn === 1) {
+      
+      if (playerTurn === player) {
+        $("#turn").html("<h2>It's Your Turn!</h2>");
+        selectionList(1);
+      }
+      else {
+        
+        $("#turn").html("<h2>Waiting for Player 1 to choose.</h2>");
+      }
+     // $("#player1").addClass("borderColor");
+      $("#player1").css("border", "2px solid blue");
+      $("#player2").css("border", "2px solid grey");
+    }
+    else if (playerTurn === 2) {
 
-$("#display1Btn").on("click", function(e) {
-  
-  e.preventDefault();
-    $("#p1Selection").empty();
-    var newDiv = $("<div>"+  selectedValue1 +"</div>");
-    $(newDiv).addClass("largeFont");
-    $("#p1Selection").append(newDiv);
-    $("#player2").addClass("borderColor");  
-  
-  });
+      if (playerTurn === player) {
+        $("#turn").html("<h2>It's Your Turn!</h2>");
+        selectionList(2);
+      }
+      else {
+        $("#turn").html("<h2>Waiting for player 2  to choose.</h2>");
+      }
+      //console.log($("#player1").text());
+      //$("#player2").addClass("borderColor");
+      $("#player2").css("border", "2px solid blue");
+      $("#player1").css("border", "2px solid grey");
+    }
+    else if (playerTurn === 3) {
+      winner = checkWinner(player1Info.selectedValue,player2Info.selectedValue);
 
+      $("#p1Selection").text(player1Info.selectedValue);
+      $("#p2Selection").text(player2Info.selectedValue);
+
+      console.log(player1Info);
+      console.log(player2Info);
+      $("#result").addClass("resultFont");
+      if (winner===1){
+        win1++;
+        losses2++;
+        database.ref("/players/1/wins").set(win1);
+        database.ref("/players/2/losses").set(losses2);
+        $("#result").html(player1Info.playerName + " Wins!");
+      }  else if (winner===2){
+        win2++;
+        losses1++
+        database.ref("/players/2/wins").set(win2);
+        database.ref("/players/1/losses").set(losses1);
+        $("#result").html(player2Info.playerName + " Wins!");
+      } 
+      else{
+        $("#result").html("<h2> It's a Tie </h2><h2>Wins!</h2>");
+      }
+
+      //  set timeout
+      var reset = function() {
+        $("#p1Selection").empty();
+        $("#p2Selection").empty();
+        $("#result").empty();
+        $("#result").removeClass("resultFont");
+
+      if (player1Exists && player2Exists) {
+        database.ref("turn").set(1);
+      }
+      };
+      setTimeout(reset, 3000);
+    }
+    else {
+      $("#p1Selection").empty();
+      $("#p2Selection").empty();
+      $("#turn").html("<h2>Waiting for a player to join.</h2>");
+      $("#player2").css("border", "2px solid grey");
+      $("#player1").css("border", "2px solid grey");
+    }
+  }
+});
 
 $(document).on("click", ".selection1", function(e){
-//$("#Rock1").on("click",function(e) {
-  winFlag = false;
-  e.preventDefault();
-  database.ref("turn").set("2");
- selectedValue1 = $(this).attr("data-value");
- database.ref("/players/1/selectedValue").set(selectedValue1);
- $("#display1Btn").click();
-
-// $("#p1Selection").empty();
- //var newDiv = $("<div>"+  selectedValue1 +"</div>");
- //$(newDiv).addClass("largeFont");
- //$("#p1Selection").append(newDiv);
- //selectionList(2);
-// $("#player2").addClass("borderColor");
-
-
+    e.preventDefault();
+    selectedValue1 = $(this).attr("data-value");
+   database.ref("/players/1/selectedValue").set(selectedValue1);
+   $("#p1Selection").empty();
+  // var newDiv = $("<div>"+  selectedValue1 +"</div>");
+  // $(newDiv).addClass("largeFont");
+  // $("#p1Selection").append(newDiv);
+  $("#p1Selection").text(selectedValue1);
+  $("#p1Selection").addClass("largeFont");
+    playerTurn++; 
+  
+  database.ref("turn").set(playerTurn);
 });
 
+
 $(document).on("click", ".selection2", function(e){
-  //$("#Rock1").on("click",function(e) {
-  
+ 
    e.preventDefault();
-   database.ref("turn").set("1");
-   selectedValue2 = $(this).attr("data-value"); 
+
+   selectedValue2 = $(this).attr("data-value");
    database.ref("/players/2/selectedValue").set(selectedValue2);
    $("#p2Selection").empty();
-   var newDiv = $("<div>"+  selectedValue2 +"</div>");
-   $(newDiv).addClass("largeFont");
-   $("#p2Selection").append(newDiv);
-     
-   
-   $("#player1").addClass("borderColor");
-  winFlag = true;
-  if (winner===1){
-    win1++;
-    losses2++;
-    database.ref("/players/1/wins").set(win1);
-    database.ref("/players/2/losses").set(losses2);
-  }  else if (winner===2){
-    win2++;
-    losses1++
-    database.ref("/players/2/wins").set(win2);
-    database.ref("/players/1/losses").set(losses1);
-  } 
+  $("#p2Selection").text(selectedValue2);
+  $("#p2Selection").addClass("largeFont");
+  playerTurn++; 
+  database.ref("turn").set(playerTurn);
+
   });
+
 
 function selectionList(key){
 
@@ -183,12 +222,12 @@ function addNewUser(){
         playerName: playerName,
         wins : 0,
         losses : 0,
-        selectedValue : null,
+        selectedValue : '',
         });
         database.ref("/players/2").onDisconnect().remove();
         database.ref("turn").onDisconnect().remove();
         $("#playerNameDiv").empty();
-        $("#playerNameDiv").html("<h2>Hi " + playerName + "! You are Player 2" + "</h2>");
+        $("#playerNameDiv").html("<h3>Hi " + playerName + "! You are Player 2" + "</h3>");
         //  selectionList(1);
        //     $("#player1").addClass("borderColor");
     } 
@@ -201,14 +240,12 @@ function addNewUser(){
         playerName: playerName,
         wins : wins,
         losses : losses,
-        selectedValue : null,
+        selectedValue : '',
         });
         database.ref("/players/1").onDisconnect().remove();
         database.ref("turn").onDisconnect().remove();
         $("#playerNameDiv").empty();
-        $("#playerNameDiv").html("<h2>Hi " + playerName + "! You are Player 1" + "</h2>");
-        //  selectionList(2);
-       //   $("#player1").addClass("borderColor");
+        $("#playerNameDiv").html("<h3>Hi " + playerName + "! You are Player 1" + "</h3>");
     } 
 }
 else

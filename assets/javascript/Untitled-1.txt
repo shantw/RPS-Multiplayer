@@ -1,0 +1,36 @@
+$(document).on("click", ".selection1", function(e){
+//$("#Rock1").on("click",function(e) {
+  winFlag = false;
+  e.preventDefault();
+  database.ref("turn").set("2");
+ selectedValue1 = $(this).attr("data-value");
+ database.ref("/players/1/selectedValue").set(selectedValue1);
+});
+
+$(document).on("click", ".selection2", function(e){
+  //$("#Rock1").on("click",function(e) {
+  
+   e.preventDefault();
+   database.ref("turn").set("1");
+   selectedValue2 = $(this).attr("data-value"); 
+   database.ref("/players/2/selectedValue").set(selectedValue2);
+   $("#p2Selection").empty();
+   var newDiv = $("<div>"+  selectedValue2 +"</div>");
+   $(newDiv).addClass("largeFont");
+   $("#p2Selection").append(newDiv);
+     
+   
+   $("#player1").addClass("borderColor");
+  winFlag = true;
+  if (winner===1){
+    win1++;
+    losses2++;
+    database.ref("/players/1/wins").set(win1);
+    database.ref("/players/2/losses").set(losses2);
+  }  else if (winner===2){
+    win2++;
+    losses1++
+    database.ref("/players/2/wins").set(win2);
+    database.ref("/players/1/losses").set(losses1);
+  } 
+  });

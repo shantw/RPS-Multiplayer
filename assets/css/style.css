@@ -18,12 +18,19 @@
 }
 
 .paddingTop{
-    padding-top: 30px;
+    padding-top: 20px;
 }
 
 .largeFont{
     font-size: 22px;
     color: blue;
     background: black;
+    text-align: center;
+}
+
+.resultFont{
+    font-size: 22px;
+    color: black;
+    background: rgba(124, 16, 119, 0.849);
     text-align: center;
 }
