@@ -14,7 +14,7 @@ var config = {
  var database = firebase.database();
  var arrRPS = ['Rock','Paper','Scissors'];
  var existingPlayers = null;
- var player = null;
+ var player = false;
  var playerTurn =null;
  var player1Info = null;
  var player2Info = null;
@@ -88,11 +88,13 @@ database.ref("turn").on("value", function(snap) {
 
   playerTurn = snap.val();
   //console.log(playerTurn);
-  if (player === 1 || player ===2) {
+  //if (player === 1 || player ===2) {
+    if (player) {
     // For turn 1
     if (playerTurn === 1) {
-      
+      console.log("p" + player);
       if (playerTurn === player) {
+        
         $("#turn").html("<h2>It's Your Turn!</h2>");
         selectionList(1);
       }
@@ -124,8 +126,6 @@ database.ref("turn").on("value", function(snap) {
       $("#p1Selection").text(player1Info.selectedValue);
       $("#p2Selection").text(player2Info.selectedValue);
 
-      console.log(player1Info);
-      console.log(player2Info);
       $("#result").addClass("resultFont");
       if (winner===1){
         win1++;
@@ -150,12 +150,17 @@ database.ref("turn").on("value", function(snap) {
         $("#p2Selection").empty();
         $("#result").empty();
         $("#result").removeClass("resultFont");
+        $("#p1Selection").removeClass("largeFont");
+        $("#p2Selection").removeClass("largeFont");
 
       if (player1Exists && player2Exists) {
         database.ref("turn").set(1);
+        console.log(playerTurn);
       }
       };
       setTimeout(reset, 3000);
+      
+
     }
     else {
       $("#p1Selection").empty();
