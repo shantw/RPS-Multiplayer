@@ -25,12 +25,11 @@ var config = {
  var losses2 = 0;
  var selectedValue1 = "";
  var selectedValue2 = "";
-
  var playerName = "";
+
  var wins = 0;
  var losses = 0;
- 
- var selectedValue = "";
+  var selectedValue = "";
 
 
 
@@ -41,7 +40,31 @@ $("#startBtn").on("click", function() {
   //calling a function to add a new player
   addNewUser();
   
-  });
+});
+
+
+// CHAT Btn
+$("#chatSendBtn").click(function() {
+
+  if ($("#chatInput").val() !== "") {
+
+    var chatMsg = $("#chatInput").val();
+    database.ref("/chat").push({
+    name: playerName,
+    message: chatMsg,
+    time: firebase.database.ServerValue.TIMESTAMP,
+    id: player
+    });
+    $("#chatInput").val("");
+  }
+
+});
+
+
+// Handle chat screen 
+
+
+
 
 database.ref("/players/").on("value", function(snapshot) {
 
