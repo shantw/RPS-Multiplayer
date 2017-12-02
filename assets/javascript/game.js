@@ -69,7 +69,7 @@ for (i=1;i <3; i++) {
     }
     else
     {
-      $("#playerName"+i).text("Waiting for Player 1");
+      $("#playerName"+i).text("Waiting for Player " + i);
       $("#p" + i + "Wins").empty();
       $("#p" + i + "Losses").empty();
    }
